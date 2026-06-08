@@ -5,15 +5,20 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     ROLE_CHOICES=(
         ('citizen','Citizens'),
+        ('worker','Worker'),
         ('officer','Officer'),
-        ('Admin','Admin'),
+        ('admin','Admin'),
     )
     role=models.CharField(max_length=10,choices=ROLE_CHOICES,default='citizen')    
-    phone=models.CharField(max_length=15,blank=True,null=True)
+    phone=models.CharField(max_length=15,blank=True,null=True,unique=True)
+    preferred_langauge=models.CharField(max_length=20,default='English')
     profile_image = models.ImageField(upload_to="profiles/",blank=True,null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
-        return self.username
+        return f"{self.username} ({self.role})"
+    
+
     
     
 
