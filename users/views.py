@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import LoginSerializer
 from .models import User
 from .serializers import RegisterSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
 class RegisterView(generics.CreateAPIView):
@@ -35,3 +36,21 @@ class LoginView(APIView):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class ProfileView(APIView):
+
+    permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        return Response({
+            "id":request.user.id,
+            "username":request.user.username,
+            "email":request.user.email,
+            "phone":request.user.phone,
+            "role":request.user.role,
+            "preferred_language":request.user.preferred_language
+        })
+
+
+
