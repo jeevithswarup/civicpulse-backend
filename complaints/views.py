@@ -27,3 +27,20 @@ class UpdateComplaint(UpdateAPIView):
 
      def get_queryset(self):
           return Complaint.objects.filter(createdBy=self.request.user)
+
+class ComplaintDetail(RetrieveAPIView):
+     permission_classes=[IsAuthenticated]
+     serializer_class=ComplaintSerializer
+     
+     def  get_queryset(self):
+          return Complaint.objects.filter(createdBy=self.request.user)
+
+class ComplaintDelete(DestroyAPIView):
+     permission_classes=[IsAuthenticated]
+     serializer_class=ComplaintSerializer
+
+     def get_queryset(self):
+          return Complaint.objects.filter(createdBy=self.request.user)
+     
+     
+          
