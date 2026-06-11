@@ -3,5 +3,5 @@ from .views import CreateComplaintView
 
 urlpatterns=[
 
-    path('complaints/',CreateComplaintView.as_view(),name='complaint'),
+    path('createcomplaint/',CreateComplaintView.as_view(),name='createcomplaint'),
 ]
