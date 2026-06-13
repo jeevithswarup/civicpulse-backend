@@ -1,5 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
+
+from django.utils.timezone import now
 from rest_framework.generics import *
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from .models import Complaint
@@ -70,4 +72,5 @@ class UpdateComplaintStatus(UpdateAPIView):
      serializer_class=  UpdateComplaintStatusSerializer
 
      def get_queryset(self):
+          resolved_at = now()
           return Complaint.objects.filter(assignedOfficer=self.request.user)
