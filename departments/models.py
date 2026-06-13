@@ -1,3 +1,12 @@
 from django.db import models
 
-# Create your models here.
+
+
+class Department(models.Model):
+
+     departments=(
+          
+          ('Roads&Infrastructure','Roads&Infrastructure'),
+          ('WaterWorks','WaterWorks'),
+          ()
+     )

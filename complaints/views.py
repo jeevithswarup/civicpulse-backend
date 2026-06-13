@@ -95,3 +95,11 @@ class CitizenDashboard(APIView):
          }
 
           return Response(data)
+
+class  OfficierDashBoard(APIView):
+      permission_classes=[IsAuthenticated]
+
+      def get(self,request):
+           complaint=Complaint.objects.filter(assignedOfficer=self.request.user)
+
+           
