@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.generics import *
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from .models import Complaint
-from .serializers import ComplaintSerializer,AssignOfficerSerializer
+from .serializers import ComplaintSerializer,AssignOfficerSerializer,UpdateComplaintStatusSerializer
 
 
 
@@ -64,3 +64,10 @@ class ListOfficierComplaints(ListAPIView,):
      def get_queryset(self):
           return Complaint.objects.filter(assignedOfficer=self.request.user)
      
+
+class UpdateComplaintStatus(UpdateAPIView):
+     permission_classes=[IsAuthenticated]
+     serializer_class=  UpdateComplaintStatusSerializer
+
+     def perform_update(self):
+          return Complaint.objects.filter(assignedOfficer=self.request.user)

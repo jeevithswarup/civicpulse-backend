@@ -22,3 +22,11 @@ class AssignOfficerSerializer(serializers.ModelSerializer):
       fields=[
          'assignedOfficer'
       ]
+
+class UpdateComplaintStatusSerializer(serializers.ModelSerializer):
+   
+   class Meta:
+      model=Complaint
+      fields=[
+         'status'
+      ]

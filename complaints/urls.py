@@ -8,4 +8,6 @@ urlpatterns=[
     path('updatecomplaint/<int:pk>/',UpdateComplaint,name='updatecomplaint'),
     path('deletecomplaint/<int:pk>/',ComplaintDelete,name='deletecomplaint'),  
     path('assign-officer<int:pk>/',AssignedOfficerView,name='assign-officer'), 
+    path('officers-complaints/',ListOfficierComplaints,name='officers-complaints'),
+    
 ]
