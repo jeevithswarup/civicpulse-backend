@@ -72,5 +72,10 @@ class UpdateComplaintStatus(UpdateAPIView):
      serializer_class=  UpdateComplaintStatusSerializer
 
      def get_queryset(self):
-          resolved_at = now()
           return Complaint.objects.filter(assignedOfficer=self.request.user)
+     def perform_update(self, serializer):
+        complaint = serializer.save()
+
+        if complaint.status == "resolved":
+            complaint.resolved_at = now()
+            complaint.save()

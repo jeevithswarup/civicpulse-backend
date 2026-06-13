@@ -9,5 +9,6 @@ urlpatterns=[
     path('deletecomplaint/<int:pk>/',ComplaintDelete.as_view(),name='deletecomplaint'),  
     path('assign-officer/<int:pk>/',AssignedOfficerView.as_view(),name='assign-officer'), 
     path('officers-complaints/',ListOfficierComplaints.as_view(),name='officers-complaints'),
+    path('status-update/',UpdateComplaintStatus.as_view(),name='status-update'),
 
 ]
