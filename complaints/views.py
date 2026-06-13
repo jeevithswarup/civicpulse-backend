@@ -69,5 +69,5 @@ class UpdateComplaintStatus(UpdateAPIView):
      permission_classes=[IsAuthenticated]
      serializer_class=  UpdateComplaintStatusSerializer
 
-     def perform_update(self):
+     def get_queryset(self):
           return Complaint.objects.filter(assignedOfficer=self.request.user)
