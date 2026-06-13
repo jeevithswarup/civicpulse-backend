@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.generics import *
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from .models import Complaint
-from .serializers import ComplaintSerializer
+from .serializers import ComplaintSerializer,AssignOfficerSerializer
 
 
 
@@ -42,5 +43,17 @@ class ComplaintDelete(DestroyAPIView):
      def get_queryset(self):
           return Complaint.objects.filter(createdBy=self.request.user)
      
-     
-          
+
+class AssignedOfficerView(UpdateAPIView):
+
+     permission_classes=[IsAuthenticated]
+     serializer_class=AssignOfficerSerializer
+     queryset=Complaint.objects.all()
+
+     def perform_update(self, serializer):
+         officer=serializer.validated_data['assignedOfficer']
+         if officer.role!='officer':
+               raise ValidationError("Selected user is not an officer.")
+         serializer.save(status='assigned')
+
+         

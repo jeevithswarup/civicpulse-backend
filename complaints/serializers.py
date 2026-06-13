@@ -15,3 +15,10 @@ class ComplaintSerializer(serializers.ModelSerializer):
       'priority',
   ]
       
+class AssignOfficerSerializer(serializers.ModelSerializer):
+
+   class Meta:
+      model=Complaint
+      fields=[
+         'assignedOfficer'
+      ]
