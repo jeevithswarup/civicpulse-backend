@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import status
-
+from rest_framework.views import APIView
 from django.utils.timezone import now
 from rest_framework.generics import *
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
@@ -79,3 +79,19 @@ class UpdateComplaintStatus(UpdateAPIView):
         if complaint.status == "resolved":
             complaint.resolved_at = now()
             complaint.save()
+
+
+class CitizenDashboard(APIView):
+     permission_classes=[IsAuthenticated]
+
+     def get(self,request):
+          complaints=Complaint.objects.filter(createdBy=request.user)
+
+
+          data = {
+            "my_complaints": complaints.count(),
+            "resolved": complaints.filter(status="resolved").count(),
+            "pending": complaints.filter(status="pending").count(),
+         }
+
+          return Response(data)
