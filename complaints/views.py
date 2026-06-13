@@ -56,4 +56,11 @@ class AssignedOfficerView(UpdateAPIView):
                raise ValidationError("Selected user is not an officer.")
          serializer.save(status='assigned')
 
-         
+
+class ListOfficierComplaints(ListAPIView,):
+     permission_classes=[IsAuthenticated]
+     serializer_class=ComplaintSerializer
+
+     def get_queryset(self):
+          return Complaint.objects.filter(assignedOfficer=self.request.user)
+     
