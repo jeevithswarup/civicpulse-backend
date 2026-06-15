@@ -104,13 +104,10 @@ class  OfficierDashBoard(APIView):
            complaint=Complaint.objects.filter(assignedOfficer=self.request.user)
 
 
-#############################  Workers ##############################################################
-
 class AssignedWorkerView(UpdateAPIView):
      permission_classes=[IsAuthenticated]
      serializer_class=AssignedWorkerSerialializer
      queryset=Complaint.objects.all()
-
 
      def perform_update(self, serializer):
           worker=serializer.validated_data['assignedWorker']
@@ -141,3 +138,19 @@ class WorkerUpdateComplaint(UpdateAPIView):
           if complaint.status=='resolved':
                 complaint.resolved_at = now()
                 complaint.save()
+
+
+class WorkerDashboard(APIView):
+     permission_classes=[IsAuthenticated]
+
+     def get(self,request):
+          complaints=Complaint.objects.filter(assinedWorker=self.request.user)
+
+          data = {
+            "total_assigned": complaints.count(),
+            "pending": complaints.filter(status="pending").count(),
+            "in_progress": complaints.filter(status="in_progress").count(),
+            "resolved": complaints.filter(status="resolved").count(),
+        }
+          return Response(data)  
+     
