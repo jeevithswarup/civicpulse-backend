@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from departments.models import Department
 
 class User(AbstractUser):
     ROLE_CHOICES=(
@@ -9,7 +9,8 @@ class User(AbstractUser):
         ('officer','Officer'),
         ('admin','Admin'),
     )
-    role=models.CharField(max_length=10,choices=ROLE_CHOICES,default='citizen')    
+    department=models.ForeignKey(Department,on_delete=models.SET_NULL,blank=True,null=True)
+    role=models.CharField(max_length=10,choices=ROLE_CHOICES,default='citizen')   
     phone=models.CharField(max_length=15,blank=True,null=True,unique=True)
     preferred_language=models.CharField(max_length=20,default='English')
     profile_image = models.ImageField(upload_to="profiles/",blank=True,null=True)
