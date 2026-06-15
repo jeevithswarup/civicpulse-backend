@@ -122,6 +122,12 @@ class AssignedWorkerView(UpdateAPIView):
           
           serializer.save(status='in_progress')
 
+class AssignedWorkerComplaints(ListAPIView):
+     permission_classes=[IsAuthenticated]
+     serializer_class=ComplaintSerializer
+
+     def get_queryset(self):
+          return Complaint.objects.filter(assignedWorker=self.request.user)
 
 
 
