@@ -7,8 +7,9 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import LoginSerializer
 from .models import User
-from .serializers import RegisterSerializer,CreateOfficerSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+from .serializers import RegisterSerializer,CreateOfficerSerializer,CreateWorkerSerializer
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
 
 
 class RegisterView(generics.CreateAPIView):
@@ -56,4 +57,20 @@ class ProfileView(APIView):
 
 
 class CreateOfficerView(CreateAPIView):
+    permission_classes=[IsAdminUser]
     serializer_class=CreateOfficerSerializer
+    queryset=User.objects.all()
+
+
+class CreateWorkerView(CreateAPIView):
+    permission_classes=[IsAuthenticated]
+    serializer_class=CreateWorkerSerializer
+    queryset=User.objects.all()
+
+    def perform_create(self, serializer):
+        if self.request.user.role != "officer":
+            raise PermissionDenied(
+                "Only officers can create workers."
+            )
+
+        serializer.save()

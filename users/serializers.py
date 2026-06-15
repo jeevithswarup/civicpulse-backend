@@ -60,3 +60,30 @@ class CreateOfficerSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+
+class CreateWorkerSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'email',
+            'phone',
+            'password'
+        ]
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+
+        user = User(
+            **validated_data,
+            role='worker',
+            department=self.context['request'].user.department
+        )
+
+        user.set_password(password)
+        user.save()
+
+        return user
