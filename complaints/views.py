@@ -5,7 +5,8 @@ from django.utils.timezone import now
 from rest_framework.generics import *
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from .models import Complaint
-from .serializers import ComplaintSerializer,AssignOfficerSerializer,UpdateComplaintStatusSerializer
+from rest_framework.exceptions import ValidationError
+from .serializers import ComplaintSerializer,AssignOfficerSerializer,UpdateComplaintStatusSerializer,AssignedWorkerSerialializer
 
 
 
@@ -102,4 +103,28 @@ class  OfficierDashBoard(APIView):
       def get(self,request):
            complaint=Complaint.objects.filter(assignedOfficer=self.request.user)
 
-           
+
+#############################  Workers ##############################################################
+
+class AssignedWorkerView(UpdateAPIView):
+     permission_classes=[IsAuthenticated]
+     serializer_class=AssignedWorkerSerialializer
+     queryset=Complaint.objects.all()
+
+
+     def perform_update(self, serializer):
+          worker=serializer.validated_data['assignedWorker']
+
+          if worker.role!='worker':
+                   raise ValidationError("Selected user is not an worker.")
+          if worker.department != self.request.user.department:
+            raise ValidationError("Worker must belong to your department.")
+          
+          serializer.save(status='in_progress')
+
+
+
+
+
+
+

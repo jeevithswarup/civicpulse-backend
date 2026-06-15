@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Complaint
 
+
 class ComplaintSerializer(serializers.ModelSerializer):
    class Meta:
       model=Complaint
@@ -31,3 +32,11 @@ class UpdateComplaintStatusSerializer(serializers.ModelSerializer):
          'status'
       ]
 
+
+class AssignedWorkerSerialializer(serializers.ModelSerializer):
+
+   class Meta:
+      model=Complaint
+      fiels=[
+         'assignedWorker'
+      ]
