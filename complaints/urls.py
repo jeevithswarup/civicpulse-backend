@@ -23,5 +23,10 @@ urlpatterns=[
     path('worker-complaints',AssignedWorkerComplaints.as_view(),name='worker-complaints'),
     path('complaint-update/<int:pk>/',WorkerUpdateComplaint.as_view(),name='complaint-update'),
     path('worker/complaints/<int:pk>/', WorkerComplaintDetail.as_view()),
+    path('worker-dashboard/',WorkerDashboard.as_view(),name='worker-dashboard'),
 
+
+    #Admin-------------------------------------------------------------------------------------------
+    path('admin-dashboard/',AdminDashboard.as_view(),name='admin-dashboard'),
+   
 ]

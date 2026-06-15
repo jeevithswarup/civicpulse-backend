@@ -201,3 +201,17 @@ class DepartmentWorkers(ListAPIView):
             role='worker',
             department=self.request.user.department
         )
+    
+#ADMIN-----------------------------------------------------------------------------------------------------------
+class AdminDashboard(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        return Response({
+            "total_complaints": Complaint.objects.count(),
+            "total_citizens": User.objects.filter(role='citizen').count(),
+            "total_officers": User.objects.filter(role='officer').count(),
+            "total_workers": User.objects.filter(role='worker').count(),
+            "resolved": Complaint.objects.filter(status='resolved').count(),
+            "pending": Complaint.objects.filter(status='pending').count(),
+        })    
