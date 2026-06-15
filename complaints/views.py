@@ -6,7 +6,7 @@ from rest_framework.generics import *
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from .models import Complaint
 from rest_framework.exceptions import ValidationError
-from .serializers import ComplaintSerializer,AssignOfficerSerializer,UpdateComplaintStatusSerializer,AssignedWorkerSerialializer
+from .serializers import *
 
 
 
@@ -128,6 +128,19 @@ class AssignedWorkerComplaints(ListAPIView):
 
      def get_queryset(self):
           return Complaint.objects.filter(assignedWorker=self.request.user)
+
+class WorkerUpdateComplaint(UpdateAPIView):
+     permission_classes=[IsAuthenticated]
+     serializer_class=WorkerUpdateSerializer
+
+     def get_queryset(self):
+          return Complaint.objects.filter(assignedWorker=self.request.user)
+     def perform_update(self, serializer):
+          complaint=serializer.save()
+
+          if complaint.status=='resolved':
+                complaint.resolved_at = now()
+                complaint.save()
 
 
 

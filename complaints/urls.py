@@ -13,5 +13,5 @@ urlpatterns=[
     path('citizen-dashboard',CitizenDashboard.as_view,name='citizen-dashboard'),
     path('assign-worker/<int:pk>/',AssignedWorkerView.as_view(),name='assign-worker'),
     path('worker-complaints',AssignedWorkerComplaints.as_view,name='worker-complaints'),
-    
+    path('complaint-update<int:pk>/',WorkerUpdateComplaint.as_view,name='complaint-update'),
 ]

@@ -37,6 +37,18 @@ class AssignedWorkerSerialializer(serializers.ModelSerializer):
 
    class Meta:
       model=Complaint
-      fiels=[
+      fields=[
          'assignedWorker'
+      ]
+
+class WorkerUpdateSerializer(serializers.ModelSerializer):
+
+   class Meta:
+      modle=Complaint
+      fields=[
+         'latitude',
+         'longitude',
+         'image',
+         'image',
+         'status',
       ]
