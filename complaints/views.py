@@ -135,15 +135,9 @@ class WorkerUpdateComplaint(UpdateAPIView):
 
      def get_queryset(self):
           return Complaint.objects.filter(assignedWorker=self.request.user)
+     
      def perform_update(self, serializer):
           complaint=serializer.save()
-
           if complaint.status=='resolved':
                 complaint.resolved_at = now()
                 complaint.save()
-
-
-
-
-
-
