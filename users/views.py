@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from rest_framework import generics
+from rest_framework.generics import CreateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import LoginSerializer
 from .models import User
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer,CreateOfficerSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
@@ -54,3 +55,5 @@ class ProfileView(APIView):
 
 
 
+class CreateOfficerView(CreateAPIView):
+    serializer_class=CreateOfficerSerializer

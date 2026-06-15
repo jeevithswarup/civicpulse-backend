@@ -30,3 +30,4 @@ class UpdateComplaintStatusSerializer(serializers.ModelSerializer):
       fields=[
          'status'
       ]
+
