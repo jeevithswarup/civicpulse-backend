@@ -48,7 +48,7 @@ class WorkerUpdateSerializer(serializers.ModelSerializer):
       fields=[
          'latitude',
          'longitude',
-         'image',
-         'image',
+         'resolution_image',
          'status',
+         'worker_notes',
       ]
