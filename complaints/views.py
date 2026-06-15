@@ -7,9 +7,11 @@ from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from .models import Complaint
 from rest_framework.exceptions import ValidationError
 from .serializers import *
+from users.serializers import WorkerSerializer
+from users.models import User
 
 
-
+#citizen----------------------------------------------------------------------------------------------------------
 class CreateComplaintView(CreateAPIView):
     permission_classes=[IsAuthenticated]
     queryset=Complaint.objects.all()
@@ -45,8 +47,23 @@ class ComplaintDelete(DestroyAPIView):
 
      def get_queryset(self):
           return Complaint.objects.filter(createdBy=self.request.user)
-     
 
+class CitizenDashboard(APIView):
+     permission_classes=[IsAuthenticated]
+
+     def get(self,request):
+          complaints=Complaint.objects.filter(createdBy=request.user)
+
+
+          data = {
+            "my_complaints": complaints.count(),
+            "resolved": complaints.filter(status="resolved").count(),
+            "pending": complaints.filter(status="pending").count(),
+         }
+
+          return Response(data)
+     
+#Officer----------------------------------------------------------------------------------------------------------
 class AssignedOfficerView(UpdateAPIView):
 
      permission_classes=[IsAuthenticated]
@@ -67,6 +84,14 @@ class ListOfficierComplaints(ListAPIView,):
      def get_queryset(self):
           return Complaint.objects.filter(assignedOfficer=self.request.user)
      
+class OfficerComplaintDetail(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ComplaintSerializer
+
+    def get_queryset(self):
+        return Complaint.objects.filter(
+            assignedOfficer=self.request.user
+        )    
 
 class UpdateComplaintStatus(UpdateAPIView):
      permission_classes=[IsAuthenticated]
@@ -82,27 +107,28 @@ class UpdateComplaintStatus(UpdateAPIView):
             complaint.save()
 
 
-class CitizenDashboard(APIView):
-     permission_classes=[IsAuthenticated]
-
-     def get(self,request):
-          complaints=Complaint.objects.filter(createdBy=request.user)
 
 
-          data = {
-            "my_complaints": complaints.count(),
+class OfficerDashboard(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        complaints = Complaint.objects.filter(
+            assignedOfficer=request.user
+        )
+
+        data = {
+            "total_assigned": complaints.count(),
+            "assigned": complaints.filter(status="assigned").count(),
+            "in_progress": complaints.filter(status="in_progress").count(),
             "resolved": complaints.filter(status="resolved").count(),
-            "pending": complaints.filter(status="pending").count(),
-         }
+            "emergency": complaints.filter(priority="emergency").count(),
+        }
 
-          return Response(data)
+        return Response(data)
+    
 
-class  OfficierDashBoard(APIView):
-      permission_classes=[IsAuthenticated]
-
-      def get(self,request):
-           complaint=Complaint.objects.filter(assignedOfficer=self.request.user)
-
+#Worker---------------------------------------------------------------------------------------------------------
 
 class AssignedWorkerView(UpdateAPIView):
      permission_classes=[IsAuthenticated]
@@ -139,18 +165,39 @@ class WorkerUpdateComplaint(UpdateAPIView):
                 complaint.resolved_at = now()
                 complaint.save()
 
+class WorkerComplaintDetail(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ComplaintSerializer
+
+    def get_queryset(self):
+        return Complaint.objects.filter(
+            assignedWorker=self.request.user
+        )
 
 class WorkerDashboard(APIView):
-     permission_classes=[IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
-     def get(self,request):
-          complaints=Complaint.objects.filter(assinedWorker=self.request.user)
+    def get(self, request):
+        complaints = Complaint.objects.filter(
+            assignedWorker=request.user
+        )
 
-          data = {
+        data = {
             "total_assigned": complaints.count(),
-            "pending": complaints.filter(status="pending").count(),
+            "assigned": complaints.filter(status="assigned").count(),
             "in_progress": complaints.filter(status="in_progress").count(),
             "resolved": complaints.filter(status="resolved").count(),
+            "emergency": complaints.filter(priority="emergency").count(),
         }
-          return Response(data)  
+
+        return Response(data)
      
+class DepartmentWorkers(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = WorkerSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(
+            role='worker',
+            department=self.request.user.department
+        )

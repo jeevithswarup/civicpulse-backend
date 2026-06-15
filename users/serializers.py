@@ -87,3 +87,14 @@ class CreateWorkerSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+    
+class WorkerSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'username',
+            'phone',
+            'department'
+        ]    

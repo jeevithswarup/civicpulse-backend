@@ -16,6 +16,7 @@ class ComplaintSerializer(serializers.ModelSerializer):
       'priority',
   ]
       
+#officer-----------------------------------------------------------------------------------------------------      
 class AssignOfficerSerializer(serializers.ModelSerializer):
 
    class Meta:
@@ -33,6 +34,7 @@ class UpdateComplaintStatusSerializer(serializers.ModelSerializer):
       ]
 
 
+#Worker----------------------------------------------------------------------------------------------------------
 class AssignedWorkerSerialializer(serializers.ModelSerializer):
 
    class Meta:
@@ -52,3 +54,4 @@ class WorkerUpdateSerializer(serializers.ModelSerializer):
          'status',
          'worker_notes',
       ]
+      
