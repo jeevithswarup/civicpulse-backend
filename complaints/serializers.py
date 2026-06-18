@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Complaint
+from .models import Complaint,ComplaintSupport
 
 
 class ComplaintSerializer(serializers.ModelSerializer):
@@ -55,3 +55,9 @@ class WorkerUpdateSerializer(serializers.ModelSerializer):
          'worker_notes',
       ]
       
+
+class ComplaintSupportSerializer(serializers.ModelSerializer):
+
+   class Meta:
+      model=ComplaintSupport
+      fields='__all__'

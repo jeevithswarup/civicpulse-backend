@@ -46,3 +46,15 @@ class Complaint(models.Model):
     def __str__(self):
         return f"{self.title} - {self.status}"
 
+
+class ComplaintSupport(models.Model):
+    complaint=models.ForeignKey(Complaint,on_delete=models.CASCADE,related_name='supports')
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    created_at=models.DateTimeField(auto_now_add=True)
+
+    class Meta: 
+        unique_together=('complaint','user')
+
+@property
+def support_count(self):
+    return self.support.count()        

@@ -28,5 +28,8 @@ urlpatterns=[
 
     #Admin-------------------------------------------------------------------------------------------
     path('admin-dashboard/',AdminDashboard.as_view(),name='admin-dashboard'),
+
+#-------------------------------------------------------------------------------------------------------
+    path('complaints/<int:pk>/support/',SupportComplaintView.as_view(),name='support-complaint'),
    
 ]

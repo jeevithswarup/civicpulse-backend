@@ -215,3 +215,20 @@ class AdminDashboard(APIView):
             "resolved": Complaint.objects.filter(status='resolved').count(),
             "pending": Complaint.objects.filter(status='pending').count(),
         })    
+
+
+class SupportComplaintView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+
+        complaint = Complaint.objects.get(pk=pk)
+
+        ComplaintSupport.objects.get_or_create(
+            complaint=complaint,
+            user=request.user
+        )
+
+        return Response({
+            "message": "Complaint supported successfully"
+        })
