@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Complaint
+from .models import Complaint,ComplaintSupport
 from users.models import User
 
 
@@ -24,3 +24,6 @@ def formfield_for_foreignkey(self, db_field, request, **kwargs):
     return super().formfield_for_foreignkey(
         db_field, request, **kwargs
     )
+
+admin.site.register(Complaint)
+admin.site.register(ComplaintSupport)
