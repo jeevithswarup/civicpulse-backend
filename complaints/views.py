@@ -127,7 +127,16 @@ class OfficerDashboard(APIView):
 
         return Response(data)
     
+class DepartmentWorkers(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = WorkerSerializer
 
+    def get_queryset(self):
+        return User.objects.filter(
+            role='worker',
+            department=self.request.user.department
+        )
+    
 #Worker---------------------------------------------------------------------------------------------------------
 
 class AssignedWorkerView(UpdateAPIView):
