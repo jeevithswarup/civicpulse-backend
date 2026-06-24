@@ -56,8 +56,13 @@ class WorkerUpdateSerializer(serializers.ModelSerializer):
       ]
       
 
-class ComplaintSupportSerializer(serializers.ModelSerializer):
+class ComplaintSerializer(serializers.ModelSerializer):
 
-   class Meta:
-      model=ComplaintSupport
-      fields='__all__'
+    support_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Complaint
+        fields = '__all__'
+
+    def get_support_count(self, obj):
+        return obj.supports.count()

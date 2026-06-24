@@ -4,21 +4,63 @@ from rest_framework.views import APIView
 from django.utils.timezone import now
 from rest_framework.generics import *
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
-from .models import Complaint
 from rest_framework.exceptions import ValidationError
 from .serializers import *
 from users.serializers import WorkerSerializer
 from users.models import User
-
-
+from .models import Complaint, ComplaintSupport
+from math import radians, sin, cos, sqrt, atan2
+from django.db.models import Count
 #citizen----------------------------------------------------------------------------------------------------------
+def distance(lat1, lon1, lat2, lon2):
+    R = 6371000
+
+    dlat = radians(float(lat2) - float(lat1))
+    dlon = radians(float(lon2) - float(lon1))
+
+    a = (
+        sin(dlat / 2) ** 2
+        + cos(radians(float(lat1)))
+        * cos(radians(float(lat2)))
+        * sin(dlon / 2) ** 2
+    )
+
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    return R * c
 class CreateComplaintView(CreateAPIView):
     permission_classes=[IsAuthenticated]
     queryset=Complaint.objects.all()
     serializer_class=ComplaintSerializer
-
+    
+    
+   
     def perform_create(self, serializer):
-        serializer.save(createdBy=self.request.user)
+
+        lat = serializer.validated_data['latitude']
+        lon = serializer.validated_data['longitude']
+        category = serializer.validated_data['category']
+
+        complaints = Complaint.objects.filter(
+            category=category
+        ).exclude(status='resolved')
+
+        for complaint in complaints:
+
+            dist = distance(
+                lat,
+                lon,
+                complaint.latitude,
+                complaint.longitude
+            )
+
+            if dist <= 100:
+                raise ValidationError({
+                    "duplicate": True,
+                    "complaint_id": complaint.id,
+                    "message": "Similar complaint already exists nearby"
+                })
+
+        serializer.save(createdBy=self.request.user)  
 
 class MyComplaints(ListAPIView):
     permission_classes=[IsAuthenticated]
@@ -201,15 +243,7 @@ class WorkerDashboard(APIView):
 
         return Response(data)
      
-class DepartmentWorkers(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = WorkerSerializer
 
-    def get_queryset(self):
-        return User.objects.filter(
-            role='worker',
-            department=self.request.user.department
-        )
     
 #ADMIN-----------------------------------------------------------------------------------------------------------
 class AdminDashboard(APIView):
@@ -233,11 +267,27 @@ class SupportComplaintView(APIView):
 
         complaint = Complaint.objects.get(pk=pk)
 
-        ComplaintSupport.objects.get_or_create(
+        support, created = ComplaintSupport.objects.get_or_create(
             complaint=complaint,
             user=request.user
         )
 
+        if not created:
+            return Response(
+                {"message": "You already supported this complaint"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         return Response({
             "message": "Complaint supported successfully"
         })
+    
+
+class PopularComplaints(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ComplaintSerializer
+
+    def get_queryset(self):
+        return Complaint.objects.annotate(
+            support_count=Count('supports')
+        ).order_by('-support_count')    

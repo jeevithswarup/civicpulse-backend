@@ -42,7 +42,7 @@ class Complaint(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)    
     resolved_at = models.DateTimeField(null=True,blank=True)
-    
+    support_count = models.PositiveIntegerField(default=0)
     def __str__(self):
         return f"{self.title} - {self.status}"
 
