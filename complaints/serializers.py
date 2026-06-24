@@ -66,3 +66,5 @@ class ComplaintSerializer(serializers.ModelSerializer):
 
     def get_support_count(self, obj):
         return obj.supports.count()
+
+    

@@ -291,3 +291,11 @@ class PopularComplaints(ListAPIView):
         return Complaint.objects.annotate(
             support_count=Count('supports')
         ).order_by('-support_count')    
+
+
+class NearbyComplaints(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ComplaintSerializer
+
+    def get_queryset(self):
+        return Complaint.objects.exclude(status='resolved')

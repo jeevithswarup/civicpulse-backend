@@ -33,5 +33,6 @@ urlpatterns=[
 
 #-------------------------------------------------------------------------------------------------------
     path('complaints/<int:pk>/support/',SupportComplaintView.as_view(),name='support-complaint'),
-   
+    path('popular-complaints/',PopularComplaints.as_view(),name='popular-complaints'),
+    path('nearby-complaints/',NearbyComplaints.as_view(),name='nearby-complaints'),
 ]
