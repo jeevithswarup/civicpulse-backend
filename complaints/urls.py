@@ -4,7 +4,7 @@ from .views import *
 urlpatterns=[
 
     #citizen---------------------------------------------------------------------------------------
-    path('citizen-dashboard/',CitizenDashboard.as_view,name='citizen-dashboard'),
+    path('citizen-dashboard/',CitizenDashboard.as_view(),name='citizen-dashboard'),
     path('createcomplaint/',CreateComplaintView.as_view(),name='createcomplaint'),
     path('my/',MyComplaints.as_view(),name='mycomplaints'),
     path('updatecomplaint/<int:pk>/',UpdateComplaint.as_view(),name='updatecomplaint'),

@@ -131,3 +131,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 CORS_ALLOW_ALL_ORIGINS = True
+
+# Allow credentials for JWT (cookie-based auth if needed in future)
+CORS_ALLOW_CREDENTIALS = True
+
+# Media files (complaint images, profile images)
+import os
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
