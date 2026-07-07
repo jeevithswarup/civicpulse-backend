@@ -4,23 +4,23 @@ from .models import User
 from departments.models import Department
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password=serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True)
 
     class Meta:
-        model=User
-        fields=[
+        model = User
+        # 'role' is intentionally excluded — all self-registered users are citizens
+        fields = [
             'username',
             'email',
             'phone',
-            'role',
             'preferred_language',
-            'password'
+            'password',
         ]
 
-    def create(self,validated_data):
-        password=validated_data.pop('password')
-
-        user=User(**validated_data)
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        # Force role to citizen for all public registrations
+        user = User(**validated_data, role='citizen')
         user.set_password(password)
         user.save()
         return user

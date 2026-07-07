@@ -13,30 +13,47 @@ from rest_framework.permissions import IsAuthenticated,IsAdminUser
 
 
 class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
 
-    queryset=User.objects.all()
-    serializer_class=RegisterSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            # Flatten errors into a single readable message for the frontend
+            errors = serializer.errors
+            # username already taken is the most common case
+            if 'username' in errors:
+                msg = f"Username: {errors['username'][0]}"
+            elif 'phone' in errors:
+                msg = f"Phone: {errors['phone'][0]}"
+            elif 'email' in errors:
+                msg = f"Email: {errors['email'][0]}"
+            else:
+                msg = list(errors.values())[0][0] if errors else "Registration failed."
+            return Response({"detail": msg}, status=status.HTTP_400_BAD_REQUEST)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class LoginView(APIView):
 
-    def post(self,request):
-        serializer=LoginSerializer(data=request.data)
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
 
         if serializer.is_valid():
-            user=serializer.validated_data["user"]
-
-            refresh=RefreshToken.for_user(user)
+            user = serializer.validated_data["user"]
+            refresh = RefreshToken.for_user(user)
 
             return Response({
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
                 "username": user.username,
                 "role": user.role,
-        
             })
+
+        # Return a clean `detail` key so the frontend client can read it directly
         return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
+            {"detail": "Invalid username or password."},
+            status=status.HTTP_401_UNAUTHORIZED
         )
 
 
