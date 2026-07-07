@@ -130,9 +130,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-CORS_ALLOW_ALL_ORIGINS = True
 
-# Allow credentials for JWT (cookie-based auth if needed in future)
+# CORS — allow the frontend dev server and any localhost origin
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+]
+# Note: CORS_ALLOW_ALL_ORIGINS and CORS_ALLOW_CREDENTIALS=True cannot be used together.
+# Use CORS_ALLOWED_ORIGINS instead.
 CORS_ALLOW_CREDENTIALS = True
 
 # Media files (complaint images, profile images)
