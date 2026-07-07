@@ -43,6 +43,14 @@ class Complaint(models.Model):
     updated_at=models.DateTimeField(auto_now=True)    
     resolved_at = models.DateTimeField(null=True,blank=True)
     support_count = models.PositiveIntegerField(default=0)
+
+    def save(self, *args, **kwargs):
+        # Auto-generate complaintID before first save
+        if not self.complaintID:
+            import uuid
+            self.complaintID = f"CMP-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.title} - {self.status}"
 
