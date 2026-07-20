@@ -131,18 +131,39 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# CORS — allow the frontend dev server and any localhost origin
+# ── CORS ──────────────────────────────────────────────────────────────────────
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
 ]
-# Note: CORS_ALLOW_ALL_ORIGINS and CORS_ALLOW_CREDENTIALS=True cannot be used together.
-# Use CORS_ALLOWED_ORIGINS instead.
 CORS_ALLOW_CREDENTIALS = True
 
-# Media files (complaint images, profile images)
+# ── Redis Cache ───────────────────────────────────────────────────────────────
+# Redis is used for:
+#   1. Django cache framework (API response caching)
+#   2. JWT token blacklist (via SimpleJWT)
+#   3. Rate limiting (future)
+# Make sure Redis is running: redis-server
+# Falls back to local memory cache if Redis is unavailable.
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": REDIS_URL,
+        "KEY_PREFIX": "civicpulse",
+        "TIMEOUT": 300,  # 5 minutes default
+    }
+}
+
+# ── Session ───────────────────────────────────────────────────────────────────
+# Store sessions in Redis too (faster than DB)
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+# ── Media files ───────────────────────────────────────────────────────────────
 import os
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

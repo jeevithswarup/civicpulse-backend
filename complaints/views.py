@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from django.utils.timezone import now
+from django.core.cache import cache
 from rest_framework.generics import (
     CreateAPIView, ListAPIView, UpdateAPIView,
     DestroyAPIView, RetrieveAPIView
@@ -12,7 +13,7 @@ from .serializers import (
     ComplaintSerializer,
     AssignOfficerSerializer,
     UpdateComplaintStatusSerializer,
-    AssignedWorkerSerializer,   # fixed name (was AssignedWorkerSerialializer)
+    AssignedWorkerSerializer,
     WorkerUpdateSerializer,
 )
 from users.serializers import WorkerSerializer
@@ -129,9 +130,23 @@ class PopularComplaints(ListAPIView):
     serializer_class = ComplaintSerializer
 
     def get_queryset(self):
-        return Complaint.objects.annotate(
+        # Cache for 2 minutes — this query is expensive (annotate + order)
+        cache_key = "popular_complaints"
+        cached_ids = cache.get(cache_key)
+
+        if cached_ids is not None:
+            # Preserve order from cached id list
+            complaints = Complaint.objects.filter(id__in=cached_ids)
+            id_order = {id: i for i, id in enumerate(cached_ids)}
+            return sorted(complaints, key=lambda c: id_order.get(c.id, 0))
+
+        qs = Complaint.objects.annotate(
             total_supports=Count('supports')
         ).order_by('-total_supports')[:20]
+
+        # Cache the IDs for 2 minutes
+        cache.set(cache_key, [c.id for c in qs], timeout=120)
+        return qs
 
 
 class NearbyComplaints(ListAPIView):
@@ -139,24 +154,26 @@ class NearbyComplaints(ListAPIView):
     serializer_class = ComplaintSerializer
 
     def get_queryset(self):
-        # Read lat/lon from query params sent by the frontend
         try:
             user_lat = float(self.request.query_params.get('lat', 0))
             user_lon = float(self.request.query_params.get('lon', 0))
         except (TypeError, ValueError):
             user_lat, user_lon = 0.0, 0.0
 
-        # Radius in metres — 5km default
         radius = float(self.request.query_params.get('radius', 5000))
+
+        # Cache nearby IDs per rounded coord (100m grid) for 3 minutes
+        cache_key = f"nearby_{round(user_lat,3)}_{round(user_lon,3)}_{int(radius)}"
+        cached_ids = cache.get(cache_key)
+
+        if cached_ids is not None:
+            return Complaint.objects.filter(id__in=cached_ids).order_by('-created_at')
 
         complaints = Complaint.objects.exclude(status='resolved')
 
-        # If no valid coords given, just return latest 50
         if user_lat == 0.0 and user_lon == 0.0:
             return complaints.order_by('-created_at')[:50]
 
-        # Filter using Haversine — calculate in Python since SQLite
-        # doesn't have native geo functions
         nearby = []
         for complaint in complaints:
             try:
@@ -170,9 +187,8 @@ class NearbyComplaints(ListAPIView):
             except Exception:
                 continue
 
-        return Complaint.objects.filter(
-            id__in=nearby
-        ).order_by('-created_at')[:50]
+        cache.set(cache_key, nearby, timeout=180)
+        return Complaint.objects.filter(id__in=nearby).order_by('-created_at')[:50]
 
 
 # ── Officer ───────────────────────────────────────────────────────────────────
@@ -308,11 +324,19 @@ class AdminDashboard(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request):
-        return Response({
+        # Cache for 1 minute — counts the entire DB
+        cache_key = "admin_dashboard"
+        cached = cache.get(cache_key)
+        if cached:
+            return Response(cached)
+
+        data = {
             "total_complaints": Complaint.objects.count(),
             "total_citizens":   User.objects.filter(role='citizen').count(),
             "total_officers":   User.objects.filter(role='officer').count(),
             "total_workers":    User.objects.filter(role='worker').count(),
             "resolved":         Complaint.objects.filter(status='resolved').count(),
             "pending":          Complaint.objects.filter(status='pending').count(),
-        })
+        }
+        cache.set(cache_key, data, timeout=60)
+        return Response(data)

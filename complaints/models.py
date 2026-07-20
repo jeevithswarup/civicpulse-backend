@@ -42,10 +42,12 @@ class Complaint(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)    
     resolved_at = models.DateTimeField(null=True,blank=True)
-    support_count = models.PositiveIntegerField(default=0)
+    # NOTE: support_count is computed dynamically by the serializer
+    # via ComplaintSupport.supports.count() — do not store it as a field.
+    # Keeping it as default=0 for backwards compatibility with migrations only.
+    support_count = models.PositiveIntegerField(default=0, editable=False)
 
     def save(self, *args, **kwargs):
-        # Auto-generate complaintID before first save
         if not self.complaintID:
             import uuid
             self.complaintID = f"CMP-{uuid.uuid4().hex[:8].upper()}"
@@ -56,13 +58,9 @@ class Complaint(models.Model):
 
 
 class ComplaintSupport(models.Model):
-    complaint=models.ForeignKey(Complaint,on_delete=models.CASCADE,related_name='supports')
-    user=models.ForeignKey(User,on_delete=models.CASCADE)
-    created_at=models.DateTimeField(auto_now_add=True)
+    complaint = models.ForeignKey(Complaint, on_delete=models.CASCADE, related_name='supports')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta: 
-        unique_together=('complaint','user')
-
-@property
-def support_count(self):
-    return self.support.count()        
+    class Meta:
+        unique_together = ('complaint', 'user')
