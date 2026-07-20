@@ -139,8 +139,40 @@ class NearbyComplaints(ListAPIView):
     serializer_class = ComplaintSerializer
 
     def get_queryset(self):
-        # Optionally filter by lat/lon from query params in future
-        return Complaint.objects.exclude(status='resolved').order_by('-created_at')[:50]
+        # Read lat/lon from query params sent by the frontend
+        try:
+            user_lat = float(self.request.query_params.get('lat', 0))
+            user_lon = float(self.request.query_params.get('lon', 0))
+        except (TypeError, ValueError):
+            user_lat, user_lon = 0.0, 0.0
+
+        # Radius in metres — 5km default
+        radius = float(self.request.query_params.get('radius', 5000))
+
+        complaints = Complaint.objects.exclude(status='resolved')
+
+        # If no valid coords given, just return latest 50
+        if user_lat == 0.0 and user_lon == 0.0:
+            return complaints.order_by('-created_at')[:50]
+
+        # Filter using Haversine — calculate in Python since SQLite
+        # doesn't have native geo functions
+        nearby = []
+        for complaint in complaints:
+            try:
+                dist = haversine(
+                    user_lat, user_lon,
+                    float(complaint.latitude),
+                    float(complaint.longitude)
+                )
+                if dist <= radius:
+                    nearby.append(complaint.id)
+            except Exception:
+                continue
+
+        return Complaint.objects.filter(
+            id__in=nearby
+        ).order_by('-created_at')[:50]
 
 
 # ── Officer ───────────────────────────────────────────────────────────────────
